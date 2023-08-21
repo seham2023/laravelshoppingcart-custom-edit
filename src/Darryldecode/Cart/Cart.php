@@ -1,4 +1,6 @@
-<?php namespace Darryldecode\Cart;
+<?php
+
+namespace Darryldecode\Cart;
 
 use Darryldecode\Cart\Exceptions\InvalidConditionException;
 use Darryldecode\Cart\Exceptions\InvalidItemException;
@@ -154,7 +156,7 @@ class Cart
      * @return $this
      * @throws InvalidItemException
      */
-    public function add($id, $name = null, $price = null, $quantity = null, $attributes = array(), $conditions = array(), $associatedModel = null)
+    public function add($id, $product_id = null, $name = null, $price = null, $quantity = null, $attributes = array(), $conditions = array(), $associatedModel = null)
     {
         // if the first argument is an array,
         // we will need to call add again
@@ -165,6 +167,7 @@ class Cart
                 foreach ($id as $item) {
                     $this->add(
                         $item['id'],
+                        $item['product_id'],
                         $item['name'],
                         $item['price'],
                         $item['quantity'],
@@ -176,6 +179,7 @@ class Cart
             } else {
                 $this->add(
                     $id['id'],
+                    $id['product_id'],
                     $id['name'],
                     $id['price'],
                     $id['quantity'],
@@ -190,6 +194,7 @@ class Cart
 
         $data = array(
             'id' => $id,
+            'product_id' => $product_id,
             'name' => $name,
             'price' => Helpers::normalizePrice($price),
             'quantity' => $quantity,
@@ -672,8 +677,8 @@ class Cart
      */
     public function getContent()
     {
-        return (new CartCollection($this->session->get($this->sessionKeyCartItems)))->reject(function($item) {
-            return ! ($item instanceof ItemCollection);
+        return (new CartCollection($this->session->get($this->sessionKeyCartItems)))->reject(function ($item) {
+            return !($item instanceof ItemCollection);
         });
     }
 
@@ -698,6 +703,7 @@ class Cart
     {
         $rules = array(
             'id' => 'required',
+            'product_id' => 'sometimes',
             'price' => 'required|numeric',
             'quantity' => 'required|numeric|min:0.1',
             'name' => 'required',
